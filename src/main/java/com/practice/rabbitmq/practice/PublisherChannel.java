@@ -24,6 +24,7 @@ public  class PublisherChannel {
     }
 
     public void sendMessage(String message) throws IOException{
+        System.out.println("_______________________________________________________________________________");
         channel.basicPublish("",queueName, MessageProperties.PERSISTENT_TEXT_PLAIN,message.getBytes());
     }
 

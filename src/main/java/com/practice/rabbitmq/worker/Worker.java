@@ -8,14 +8,17 @@ import com.rabbitmq.client.DeliverCallback;
 import java.nio.charset.StandardCharsets;
 
 public class Worker {
-    private static final String TASK_QUEUE_NAME = "task_queue";
+    private static final String TASK_QUEUE_NAME = "queue_log";//"task_queue";
 
     public static void main(String[] argv) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("172.16.26.147");
-        factory.setUsername("admin");
-        factory.setPassword("rabidmq@16263");
-        factory.setVirtualHost("/");
+//        factory.setUsername("admin");
+//        factory.setPassword("rabidmq@16263");
+//        factory.setVirtualHost("/");
+        factory.setUsername("telenorTest");
+        factory.setPassword("123321");
+        factory.setVirtualHost("telenorTest");
         factory.setPort(5672);
         final Connection connection = factory.newConnection();
         final Channel channel = connection.createChannel();

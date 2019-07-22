@@ -1,22 +1,27 @@
 package com.practice.rabbitmq.worker;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.MessageProperties;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Scanner;
 
 public class NewTask {
-    private static final String TASK_QUEUE_NAME = "task_queue";
+    private static final String TASK_QUEUE_NAME = "testQueue2";//"testQueue1";
 
     public static void main(String[] argv) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("172.16.26.147");
-        factory.setUsername("admin");
-        factory.setPassword("rabidmq@16263");
-        factory.setVirtualHost("/");
+//        factory.setUsername("admin");
+//        factory.setPassword("rabidmq@16263");
+//        factory.setVirtualHost("/");
+        factory.setUsername("telenorTest");
+        factory.setPassword("123321");
+        factory.setVirtualHost("telenorTest");
         factory.setPort(5672);
 
         try (Connection connection = factory.newConnection();
@@ -26,14 +31,100 @@ public class NewTask {
             Scanner scanner = new Scanner(System.in);
             int i=0;
             while(i++<10){
-                System.out.println("Write new Message:");
+                System.out.println("Write new Message:(write any one word)");
                 String message = scanner.next();
-
+                message = getMessageText();
+                message = getComputeRequestMessage();
                 channel.basicPublish("", TASK_QUEUE_NAME,
                         MessageProperties.PERSISTENT_TEXT_PLAIN,
                         message.getBytes(StandardCharsets.UTF_8));
                 System.out.println(" [x] Sent '" + message + "'");
             }
+        }
+    }
+    public static String getComputeRequestMessage() throws Exception{
+        UserExtensionLogComputeRequest userExtensionLogComputeRequest = new UserExtensionLogComputeRequest("7001",LocalDateTime.now().minusHours(2).toString(),
+                                                                                        LocalDateTime.now().minusMinutes(10).toString());
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(userExtensionLogComputeRequest);
+    }
+
+    public static String getMessageText() throws Exception {
+        QueueLog queueLog = new QueueLog("7001","join",LocalDateTime.now().toString());
+        ObjectMapper mapper = new ObjectMapper();
+
+        return mapper.writeValueAsString(queueLog);  //writerWithDefaultPrettyPrinter()
+    }
+
+    public static class UserExtensionLogComputeRequest{
+        private String extension;
+        private String startTime;
+        private String endTime;
+
+        public UserExtensionLogComputeRequest(String extension, String startTime, String endTime) {
+            this.extension = extension;
+            this.startTime = startTime;
+            this.endTime = endTime;
+        }
+
+        public String getExtension() {
+            return extension;
+        }
+
+        public void setExtension(String extension) {
+            this.extension = extension;
+        }
+
+        public String getStartTime() {
+            return startTime;
+        }
+
+        public void setStartTime(String startTime) {
+            this.startTime = startTime;
+        }
+
+        public String getEndTime() {
+            return endTime;
+        }
+
+        public void setEndTime(String endTime) {
+            this.endTime = endTime;
+        }
+    }
+
+    public static class QueueLog{
+        private String extension;
+        private String status;
+        private String eventTime;
+
+        public QueueLog(String extension, String status, String eventTime) {
+            this.extension = extension;
+            this.status = status;
+            this.eventTime = eventTime;
+        }
+
+        public String getExtension() {
+            return extension;
+        }
+
+        public void setExtension(String extension) {
+            this.extension = extension;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getEventTime() {
+            return eventTime;
+        }
+
+        public void setEventTime(String eventTime) {
+            this.eventTime = eventTime;
         }
     }
 }

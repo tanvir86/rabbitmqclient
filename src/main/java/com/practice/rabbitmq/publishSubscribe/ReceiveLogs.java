@@ -8,20 +8,25 @@ import com.rabbitmq.client.DeliverCallback;
 import java.nio.charset.StandardCharsets;
 
 public class ReceiveLogs {
-    private static final String EXCHANGE_NAME = "logs";
-
+    private static final String EXCHANGE_NAME = "realTimeData";//"logs";
+    private static int counter = 1;
     public static void main(String[] argv) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("172.16.26.147");
-        factory.setUsername("admin");
-        factory.setPassword("rabidmq@16263");
-        factory.setVirtualHost("/");
+//        factory.setUsername("admin");
+//        factory.setPassword("rabidmq@16263");
+//        factory.setVirtualHost("/");
+//        factory.setPort(5672);
+
+        factory.setUsername("telenorTest");
+        factory.setPassword("123321");
+        factory.setVirtualHost("telenorTest");
         factory.setPort(5672);
 
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
-        channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+        channel.exchangeDeclare(EXCHANGE_NAME, "fanout",true);
         String queueName = channel.queueDeclare().getQueue();
         channel.queueBind(queueName, EXCHANGE_NAME, "");
 
@@ -29,7 +34,7 @@ public class ReceiveLogs {
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-            System.out.println(" [x] Received '" + message + "'");
+            System.out.println(counter++ +" [x] Received '" + message + "'");
             channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         };
         channel.basicConsume(queueName, false, deliverCallback, consumerTag -> { });
